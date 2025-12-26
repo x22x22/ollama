@@ -530,6 +530,12 @@ type CreateRequest struct {
 	// RemoteHost is the URL of the upstream ollama API for the model (if any).
 	RemoteHost string `json:"remote_host,omitempty"`
 
+	// RemoteType specifies the type of remote API: "ollama" (default) or "openai"
+	RemoteType string `json:"remote_type,omitempty"`
+
+	// RemoteAPIKey is the API key for the remote service (when RemoteType is "openai")
+	RemoteAPIKey string `json:"remote_api_key,omitempty"`
+
 	// Files is a map of files include when creating the model.
 	Files map[string]string `json:"files,omitempty"`
 

@@ -111,6 +111,14 @@ func (s *Server) CreateHandler(c *gin.Context) {
 
 				config.RemoteModel = r.From
 				config.RemoteHost = ru
+				config.RemoteType = r.RemoteType
+				config.RemoteAPIKey = r.RemoteAPIKey
+				
+				// Default to "ollama" if not specified
+				if config.RemoteType == "" {
+					config.RemoteType = "ollama"
+				}
+				
 				remote = true
 			} else {
 				ctx, cancel := context.WithCancel(c.Request.Context())

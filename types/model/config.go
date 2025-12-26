@@ -13,6 +13,8 @@ type ConfigV2 struct {
 
 	RemoteHost  string `json:"remote_host,omitempty"`
 	RemoteModel string `json:"remote_model,omitempty"`
+	RemoteType  string `json:"remote_type,omitempty"` // "ollama" (default) or "openai"
+	RemoteAPIKey string `json:"remote_api_key,omitempty"` // API key for remote service
 
 	// used for remotes
 	Capabilities []string `json:"capabilities,omitempty"`
