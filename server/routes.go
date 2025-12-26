@@ -42,6 +42,7 @@ import (
 	"github.com/ollama/ollama/middleware"
 	"github.com/ollama/ollama/model/parsers"
 	"github.com/ollama/ollama/model/renderers"
+	"github.com/ollama/ollama/openai"
 	"github.com/ollama/ollama/server/internal/client/ollama"
 	"github.com/ollama/ollama/server/internal/registry"
 	"github.com/ollama/ollama/template"
@@ -1922,10 +1923,13 @@ func (s *Server) ChatHandler(c *gin.Context) {
 			return
 		}
 
-		if !slices.Contains(envconfig.Remotes(), remoteURL.Hostname()) {
-			slog.Info("remote model", "remotes", envconfig.Remotes(), "remoteURL", m.Config.RemoteHost, "hostname", remoteURL.Hostname())
-			c.JSON(http.StatusBadRequest, gin.H{"error": "this server cannot run this remote model"})
-			return
+		// For OpenAI-compatible remotes, skip the remotes check
+		if m.Config.RemoteType != "openai" {
+			if !slices.Contains(envconfig.Remotes(), remoteURL.Hostname()) {
+				slog.Info("remote model", "remotes", envconfig.Remotes(), "remoteURL", m.Config.RemoteHost, "hostname", remoteURL.Hostname())
+				c.JSON(http.StatusBadRequest, gin.H{"error": "this server cannot run this remote model"})
+				return
+			}
 		}
 
 		req.Model = m.Config.RemoteModel
@@ -1973,8 +1977,15 @@ func (s *Server) ChatHandler(c *gin.Context) {
 			return nil
 		}
 
-		client := api.NewClient(remoteURL, http.DefaultClient)
-		err = client.Chat(c, &req, fn)
+		// Use OpenAI client for OpenAI-compatible remotes
+		if m.Config.RemoteType == "openai" {
+			client := openai.NewRemoteClient(remoteURL, m.Config.RemoteAPIKey, http.DefaultClient)
+			err = client.ChatCompletion(c.Request.Context(), &req, fn)
+		} else {
+			client := api.NewClient(remoteURL, http.DefaultClient)
+			err = client.Chat(c, &req, fn)
+		}
+		
 		if err != nil {
 			var authError api.AuthorizationError
 			if errors.As(err, &authError) {
