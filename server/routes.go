@@ -1973,8 +1973,16 @@ func (s *Server) ChatHandler(c *gin.Context) {
 			return nil
 		}
 
-		client := api.NewClient(remoteURL, http.DefaultClient)
-		err = client.Chat(c, &req, fn)
+		// Check if this is an OpenAI-compatible endpoint
+		if isOpenAICompatible(m.Config.RemoteHost) {
+			slog.Info("using OpenAI-compatible proxy", "remoteHost", m.Config.RemoteHost, "remoteModel", m.Config.RemoteModel)
+			err = callOpenAICompatibleAPI(c.Request.Context(), m.Config.RemoteHost, m.Config.RemoteModel, m.Config.RemoteAPIKey, &req, fn)
+		} else {
+			// Use standard Ollama client
+			client := api.NewClient(remoteURL, http.DefaultClient)
+			err = client.Chat(c, &req, fn)
+		}
+
 		if err != nil {
 			var authError api.AuthorizationError
 			if errors.As(err, &authError) {

@@ -111,6 +111,7 @@ func (s *Server) CreateHandler(c *gin.Context) {
 
 				config.RemoteModel = r.From
 				config.RemoteHost = ru
+				config.RemoteAPIKey = r.RemoteAPIKey
 				remote = true
 			} else {
 				ctx, cancel := context.WithCancel(c.Request.Context())
