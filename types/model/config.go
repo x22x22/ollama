@@ -11,8 +11,9 @@ type ConfigV2 struct {
 	Parser        string   `json:"parser,omitempty"`
 	Requires      string   `json:"requires,omitempty"`
 
-	RemoteHost  string `json:"remote_host,omitempty"`
-	RemoteModel string `json:"remote_model,omitempty"`
+	RemoteHost   string `json:"remote_host,omitempty"`
+	RemoteModel  string `json:"remote_model,omitempty"`
+	RemoteAPIKey string `json:"remote_api_key,omitempty"`
 
 	// used for remotes
 	Capabilities []string `json:"capabilities,omitempty"`
